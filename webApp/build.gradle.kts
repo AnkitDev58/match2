@@ -7,11 +7,18 @@ plugins {
 }
 
 kotlin {
-    js {
-        browser()
+    this.js {
+        browser {
+            webpackTask {
+                mainOutputFileName = "webApp.js"
+                sourceMaps =false
+            }
+            commonWebpackConfig {
+                mode = org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.Mode.DEVELOPMENT
+            }
+        }
         binaries.executable()
     }
-
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()

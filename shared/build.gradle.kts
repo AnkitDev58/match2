@@ -20,16 +20,25 @@ kotlin {
     }
     
     jvm()
-    
-    js {
-        browser()
+
+    this.js {
+        browser {
+            webpackTask {
+                mainOutputFileName = "webApp.js"
+            }
+            commonWebpackConfig {
+                mode = org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.Mode.DEVELOPMENT
+            }
+        }
         binaries.executable()
     }
-    
+
+
+
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()
-        binaries.executable()
+//        binaries.executable()
     }
     
     android {
