@@ -27,7 +27,7 @@ kotlin {
                 mainOutputFileName = "webApp.js"
             }
             commonWebpackConfig {
-                mode = org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.Mode.DEVELOPMENT
+                mode = org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.Mode.PRODUCTION
             }
         }
         binaries.executable()
