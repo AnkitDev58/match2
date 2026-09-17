@@ -32,6 +32,7 @@ fun App() {
             modifier = Modifier.fillMaxSize().safeContentPadding(),
             color = MaterialTheme.colorScheme.background
         ) {
+            //Show screen
             if (state.showSetup) {
                 SetupScreen(
                     onStartGame = { gridSize, contentMode ->
