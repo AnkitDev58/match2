@@ -4,88 +4,96 @@ on:
   push:
     branches:
       - main
+
   workflow_dispatch:
+
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
+
 concurrency:
-  group: pages
+  group: "pages"
   cancel-in-progress: true
 
+
 jobs:
+
   build:
+
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
+
 
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 17
+
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      - name: Start resource monitor
-        run: |
-          ( while true; do
-              echo "===== $(date '+%H:%M:%S') ====="
-              free -h
-              echo "--- top node/java processes ---"
-              ps -eo pid,pcpu,pmem,etime,cmd --sort=-pcpu | grep -E 'node|java' | grep -v grep | head -10
-              sleep 30
-            done ) &
-          echo $! > monitor.pid
 
       - name: Build Web
         timeout-minutes: 30
         env:
-          ORG_GRADLE_PROJECT_kotlin_js_webpack_log_level: info
           NODE_OPTIONS: "--max-old-space-size=4096"
+          GRADLE_OPTS: "-Xmx4g"
         run: ./gradlew jsBrowserDistribution --info
 
-      - name: Stop resource monitor
-        if: always()
-        run: kill $(cat monitor.pid) || true
 
-      - name: Show final process/disk state
-        if: always()
+      - name: Check build output
         run: |
-          ps -ef
-          free -h
-          df -h
+          echo "Generated files:"
+          find webApp/build/dist -maxdepth 4 -type f | head -100
 
-      - name: Verify dist output exists
+
+      # Required for Compose Web routing on GitHub Pages
+      - name: Fix SPA routing
         run: |
-          echo "Contents of webApp/build/dist:"
-          find webApp/build/dist -type d
+          cp webApp/build/dist/js/productionExecutable/index.html \
+             webApp/build/dist/js/productionExecutable/404.html
+
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload artifact
+
+      - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: webApp/build/dist/js/productionExecutable
 
+
+
   deploy:
+
     needs: build
+
     runs-on: ubuntu-latest
 
+
     environment:
+
       name: github-pages
+
       url: ${{ steps.deployment.outputs.page_url }}
 
+
     steps:
-      - name: Deploy
+
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
