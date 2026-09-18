@@ -4,13 +4,17 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.example.project.navigation.Navigator
+import org.example.project.presenter.matchup.MatchUpViewModel
 import org.example.project.model.*
 
-class MemoryGameViewModelTest {
+class MatchUpViewModelTest {
+
+    private val navigator = Navigator()
 
     @Test
     fun testInitialState() {
-        val viewModel = MemoryGameViewModel()
+        val viewModel = MatchUpViewModel(navigator)
         val state = viewModel.uiState.value
         
         assertTrue(state.showSetup)
@@ -23,7 +27,7 @@ class MemoryGameViewModelTest {
 
     @Test
     fun testStartGame4x4() {
-        val viewModel = MemoryGameViewModel()
+        val viewModel = MatchUpViewModel(navigator)
         viewModel.startGame(GridSize.FOUR_BY_FOUR, ContentMode.EMOJI)
         
         val state = viewModel.uiState.value
@@ -34,7 +38,7 @@ class MemoryGameViewModelTest {
 
     @Test
     fun testStartGame5x5FreeTile() {
-        val viewModel = MemoryGameViewModel()
+        val viewModel = MatchUpViewModel(navigator)
         viewModel.startGame(GridSize.FIVE_BY_FIVE, ContentMode.EMOJI)
         
         val state = viewModel.uiState.value
@@ -51,7 +55,7 @@ class MemoryGameViewModelTest {
 
     @Test
     fun testCardClickFlipsCard() {
-        val viewModel = MemoryGameViewModel()
+        val viewModel = MatchUpViewModel(navigator)
         viewModel.startGame(GridSize.FOUR_BY_FOUR, ContentMode.EMOJI)
         viewModel.onCardClicked(0)
         
@@ -62,7 +66,7 @@ class MemoryGameViewModelTest {
 
     @Test
     fun testFreeTileClickIgnored() {
-        val viewModel = MemoryGameViewModel()
+        val viewModel = MatchUpViewModel(navigator)
         viewModel.startGame(GridSize.FIVE_BY_FIVE, ContentMode.EMOJI)
         viewModel.onCardClicked(12) // Free tile
         
@@ -72,7 +76,7 @@ class MemoryGameViewModelTest {
 
     @Test
     fun testNewGameResetsState() {
-        val viewModel = MemoryGameViewModel()
+        val viewModel = MatchUpViewModel(navigator)
         viewModel.startGame(GridSize.FOUR_BY_FOUR, ContentMode.EMOJI)
         viewModel.onCardClicked(0)
         viewModel.newGame()

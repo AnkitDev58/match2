@@ -1,20 +1,14 @@
-package org.example.project.logic
+package org.example.project.presenter.matchup
 
 import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.example.project.base.BaseViewModel
 import org.example.project.model.*
 
-class MemoryGameViewModel : ViewModel() {
 
-    private val _uiState = MutableStateFlow(GameState())
-    val uiState: StateFlow<GameState> = _uiState.asStateFlow()
+class MatchUpViewModel : BaseViewModel<GameState, MatchUpEvent>(GameState()) {
 
     private val MATCH_DELAY = 800L
 
@@ -78,25 +72,37 @@ class MemoryGameViewModel : ViewModel() {
             }
         }
 
-        _uiState.value = GameState(
-            gridSize = gridSize,
-            contentMode = contentMode,
-            cards = cards,
-            showSetup = false
-        )
+        updateState {
+            it.copy(
+                gridSize = gridSize,
+                contentMode = contentMode,
+                cards = cards,
+                showSetup = false,
+                flippedIds = emptyList(),
+                inputLocked = false,
+                isGameOver = false,
+                scoreA = 0,
+                scoreB = 0,
+                currentPlayer = Player.A
+            )
+        }
     }
 
     fun goToSetup() {
-        _uiState.update { it.copy(showSetup = true) }
+        updateState { it.copy(showSetup = true) }
+    }
+
+    fun navigateBackToHome() {
+        sendEvent(MatchUpEvent.NavigateBack)
     }
 
     fun newGame() {
-        val state = _uiState.value
+        val state = currentState
         startGame(state.gridSize, state.contentMode)
     }
 
     fun onCardClicked(id: Int) {
-        val state = _uiState.value
+        val state = currentState
         if (state.inputLocked || state.isGameOver) return
 
         val card = state.cards.find { it.id == id } ?: return
@@ -108,7 +114,7 @@ class MemoryGameViewModel : ViewModel() {
         
         val newFlippedIds = state.flippedIds + id
 
-        _uiState.update { 
+        updateState { 
             it.copy(
                 cards = updatedCards,
                 flippedIds = newFlippedIds
@@ -121,12 +127,12 @@ class MemoryGameViewModel : ViewModel() {
     }
 
     private fun resolveTurn(flippedIds: List<Int>) {
-        _uiState.update { it.copy(inputLocked = true) }
+        updateState { it.copy(inputLocked = true) }
 
         viewModelScope.launch {
             delay(MATCH_DELAY)
             
-            val state = _uiState.value
+            val state = currentState
             val firstCard = state.cards.find { it.id == flippedIds[0] }!!
             val secondCard = state.cards.find { it.id == flippedIds[1] }!!
 
@@ -147,7 +153,7 @@ class MemoryGameViewModel : ViewModel() {
                 val totalPairsCount = state.gridSize.pairsNeeded * 2
                 val isGameOver = matchedCount == totalPairsCount
 
-                _uiState.update {
+                updateState {
                     it.copy(
                         cards = updatedCards,
                         scoreA = newScoreA,
@@ -169,7 +175,7 @@ class MemoryGameViewModel : ViewModel() {
                 
                 val nextPlayer = if (state.currentPlayer == Player.A) Player.B else Player.A
 
-                _uiState.update {
+                updateState {
                     it.copy(
                         cards = updatedCards,
                         currentPlayer = nextPlayer,

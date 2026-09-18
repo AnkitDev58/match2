@@ -1,4 +1,9 @@
-package org.example.project.model
+package org.example.project.presenter.matchup
+
+import org.example.project.model.CardState
+import org.example.project.model.ContentMode
+import org.example.project.model.GridSize
+import org.example.project.model.Player
 
 data class GameState(
     val gridSize: GridSize = GridSize.FOUR_BY_FOUR,
