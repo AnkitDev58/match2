@@ -85,7 +85,14 @@ fun reduce(state: GameState, action: GameAction): GameState {
                 }
                 GamePhase.SecretB -> {
                     if (action.index == state.secretA) {
-                        state.copy(message = "That cell is already claimed — choose another")
+                        state.copy(
+                            phase = GamePhase.GameOver,
+                            loser = Player.B,
+                            loserSecretIndex = action.index,
+                            scoreA = 1,
+                            scoreB = 0,
+                            cells = state.cells.map { it.copy(revealed = true) }
+                        )
                     } else {
                         state.copy(
                             secretB = action.index,
