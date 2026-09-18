@@ -8,4 +8,7 @@ sealed interface Screen {
 
     @Serializable
     data object MatchUp : Screen
+
+    @Serializable
+    data object TrapGrid : Screen
 }

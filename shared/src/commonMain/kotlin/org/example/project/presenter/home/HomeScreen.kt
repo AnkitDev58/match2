@@ -16,13 +16,18 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel, onNavigateToMatchUp: () -> Unit) {
+fun HomeScreen(
+    viewModel: HomeViewModel,
+    onNavigateToMatchUp: () -> Unit,
+    onNavigateToTrapGrid: () -> Unit
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
             when (event) {
                 HomeEvent.NavigateToMatchUp -> onNavigateToMatchUp()
+                HomeEvent.NavigateToTrapGrid -> onNavigateToTrapGrid()
             }
         }
     }

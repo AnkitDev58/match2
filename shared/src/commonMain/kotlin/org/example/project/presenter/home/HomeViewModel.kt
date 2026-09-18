@@ -9,8 +9,9 @@ import org.example.project.base.BaseViewModel
 class HomeViewModel : BaseViewModel<HomeState, HomeEvent>(HomeState()) {
     
     fun onGameSelected(gameId: String) {
-        if (gameId == "match_up") {
-            sendEvent(HomeEvent.NavigateToMatchUp)
+        when (gameId) {
+            "match_up" -> sendEvent(HomeEvent.NavigateToMatchUp)
+            "trap_grid" -> sendEvent(HomeEvent.NavigateToTrapGrid)
         }
     }
 }

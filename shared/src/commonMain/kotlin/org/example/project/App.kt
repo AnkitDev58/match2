@@ -14,6 +14,8 @@ import org.example.project.presenter.home.HomeScreen
 import org.example.project.presenter.home.HomeViewModel
 import org.example.project.presenter.matchup.MatchUpScreen
 import org.example.project.presenter.matchup.MatchUpViewModel
+import org.example.project.presenter.trapgrid.TrapGridScreen
+import org.example.project.presenter.trapgrid.TrapGridViewModel
 import org.koin.compose.KoinApplication
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,6 +43,9 @@ fun App() {
                             viewModel = homeViewModel,
                             onNavigateToMatchUp = {
                                 navController.navigate(Screen.MatchUp)
+                            },
+                            onNavigateToTrapGrid = {
+                                navController.navigate(Screen.TrapGrid)
                             }
                         )
                     }
@@ -48,6 +53,15 @@ fun App() {
                         val matchUpViewModel: MatchUpViewModel = koinViewModel()
                         MatchUpScreen(
                             viewModel = matchUpViewModel,
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+                    composable<Screen.TrapGrid> {
+                        val trapGridViewModel: TrapGridViewModel = koinViewModel()
+                        TrapGridScreen(
+                            viewModel = trapGridViewModel,
                             onNavigateBack = {
                                 navController.popBackStack()
                             }

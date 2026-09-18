@@ -15,6 +15,8 @@ import org.example.project.model.GridSize
 
 @Composable
 fun SetupScreen(
+    title: String = "Game Setup",
+    buttonText: String = "Start Game",
     onStartGame: (GridSize, ContentMode) -> Unit
 ) {
     var selectedGridSize by remember { mutableStateOf(GridSize.FOUR_BY_FOUR) }
@@ -28,7 +30,7 @@ fun SetupScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Game Setup",
+            text = title,
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 32.dp)
@@ -56,7 +58,7 @@ fun SetupScreen(
             onClick = { onStartGame(selectedGridSize, selectedContentMode) },
             modifier = Modifier.fillMaxWidth().height(56.dp)
         ) {
-            Text("Start Match Up!", fontSize = 18.sp)
+            Text(buttonText, fontSize = 18.sp)
         }
     }
 }

@@ -5,7 +5,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.example.project.ui.CardComposable
+import org.example.project.ui.GameCard
 import org.example.project.ui.ScoreBoard
 import org.example.project.ui.SetupScreen
 
@@ -40,6 +40,8 @@ fun MatchUpScreen(viewModel: MatchUpViewModel, onNavigateBack: () -> Unit) {
         if (state.showSetup) {
             Box(modifier = Modifier.fillMaxSize()) {
                 SetupScreen(
+                    title = "Match Up Setup",
+                    buttonText = "Start Match Up!",
                     onStartGame = { gridSize, contentMode ->
                         viewModel.startGame(gridSize, contentMode)
                     }
@@ -48,7 +50,7 @@ fun MatchUpScreen(viewModel: MatchUpViewModel, onNavigateBack: () -> Unit) {
                     onClick = { viewModel.navigateBackToHome() },
                     modifier = Modifier.padding(16.dp).align(Alignment.TopStart)
                 ) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back to Lounge")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back to Lounge")
                 }
             }
         } else {
@@ -72,7 +74,7 @@ fun GamePlayScreen(viewModel: MatchUpViewModel, state: GameState) {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { viewModel.navigateBackToHome() }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
@@ -113,8 +115,12 @@ fun GamePlayScreen(viewModel: MatchUpViewModel, state: GameState) {
                     userScrollEnabled = false
                 ) {
                     items(state.cards) { card ->
-                        CardComposable(
-                            card = card,
+                        GameCard(
+                            content = card.content,
+                            isFaceUp = card.isFaceUp,
+                            isMatched = card.isMatched,
+                            matchedBy = card.matchedBy,
+                            isFreeTile = card.isFreeTile,
                             onClick = { viewModel.onCardClicked(card.id) },
                             modifier = Modifier.aspectRatio(1f)
                         )
