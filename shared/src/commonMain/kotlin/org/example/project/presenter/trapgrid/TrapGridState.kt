@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 import org.example.project.model.*
 
 enum class GamePhase {
-    Setup, SecretA, HandoffA, SecretB, HandoffB, Playing, GameOver
+    Setup, SecretA, RevealingA, HandoffA, SecretB, RevealingB, HandoffB, Playing, GameOver
 }
 
 data class Cell(
@@ -30,14 +30,15 @@ data class GameState(
 sealed class GameAction {
     data class SelectSize(val size: GridSize, val contentMode: ContentMode) : GameAction()
     data class PickSecret(val index: Int) : GameAction()
+    data object ConfirmSecretReveal : GameAction()
     data object ConfirmHandoff : GameAction()
     data class RevealCell(val index: Int) : GameAction()
     data object NewGame : GameAction()
 }
 
 private val emojiPool = listOf(
-    "🍎", "🍌", "🍇", "🍓", "🍒", "🍑", "🍍", "🥝",
-    "🥥", "🍋", "🍊", "🍉", "🍈", "🍐", "🫐", "🥭", "🥑", "🥦"
+    "🍎", "🍌", "🍇", "🍓", "🍒", "🍑", "🍍", "🥝", "🥥", "🍋", "🍊", "🍉", "🍈", "🍐", "🫐", "🥭", "🥑", "🥦",
+    "🍄", "🌻", "🌈", "🍦", "🍕", "🍔", "🍟", "🍩", "🍪", "🎂", "🎸", "⚽", "🏀", "🚀", "🛸", "💎", "🔥", "✨"
 )
 
 private val colorPool = listOf(
@@ -45,7 +46,9 @@ private val colorPool = listOf(
     Color(0xFF3F51B5), Color(0xFF2196F3), Color(0xFF03A9F4), Color(0xFF00BCD4),
     Color(0xFF009688), Color(0xFF4CAF50), Color(0xFF8BC34A), Color(0xFFCDDC39),
     Color(0xFFFFEB3B), Color(0xFFFFC107), Color(0xFFFF9800), Color(0xFFFF5722),
-    Color(0xFF795548), Color(0xFF9E9E9E)
+    Color(0xFF795548), Color(0xFF9E9E9E),
+    Color(0xFF000000), Color(0xFF808080), Color(0xFF800000), Color(0xFF808000), Color(0xFF008000), Color(0xFF800080), Color(0xFF008080), Color(0xFF000080),
+    Color(0xFFA52A2A), Color(0xFFFF7F50), Color(0xFFD2691E), Color(0xFFFFD700), Color(0xFFADFF2F), Color(0xFF4B0082), Color(0xFFF0E68C), Color(0xFFB0C4DE), Color(0xFFFF00FF), Color(0xFF00FF00)
 )
 
 fun reduce(state: GameState, action: GameAction): GameState {
@@ -53,9 +56,9 @@ fun reduce(state: GameState, action: GameAction): GameState {
         is GameAction.SelectSize -> {
             val totalCells = action.size.rows * action.size.cols
             val contents = when (action.contentMode) {
-                ContentMode.EMOJI -> (emojiPool + emojiPool + emojiPool).shuffled().take(totalCells).map { CardContent.Emoji(it) }
+                ContentMode.EMOJI -> emojiPool.shuffled().take(totalCells).map { CardContent.Emoji(it) }
                 ContentMode.NUMBER -> (1..totalCells).toList().shuffled().map { CardContent.Number(it) }
-                ContentMode.COLOR -> (colorPool + colorPool + colorPool).shuffled().take(totalCells).map { CardContent.Color(it) }
+                ContentMode.COLOR -> colorPool.shuffled().take(totalCells).map { CardContent.Color(it) }
             }
             state.copy(
                 phase = GamePhase.SecretA,
@@ -77,7 +80,7 @@ fun reduce(state: GameState, action: GameAction): GameState {
                 GamePhase.SecretA -> {
                     state.copy(
                         secretA = action.index,
-                        phase = GamePhase.HandoffA
+                        phase = GamePhase.RevealingA
                     )
                 }
                 GamePhase.SecretB -> {
@@ -86,11 +89,18 @@ fun reduce(state: GameState, action: GameAction): GameState {
                     } else {
                         state.copy(
                             secretB = action.index,
-                            phase = GamePhase.HandoffB,
+                            phase = GamePhase.RevealingB,
                             message = null
                         )
                     }
                 }
+                else -> state
+            }
+        }
+        GameAction.ConfirmSecretReveal -> {
+            when (state.phase) {
+                GamePhase.RevealingA -> state.copy(phase = GamePhase.HandoffA)
+                GamePhase.RevealingB -> state.copy(phase = GamePhase.HandoffB)
                 else -> state
             }
         }

@@ -99,7 +99,9 @@ fun TrapGamePlayScreen(viewModel: TrapGridViewModel, state: GameState) {
             Text(
                 text = when (state.phase) {
                     GamePhase.SecretA -> "Player A: Pick a Trap"
+                    GamePhase.RevealingA -> "Trap Selected!"
                     GamePhase.SecretB -> "Player B: Pick a Trap"
+                    GamePhase.RevealingB -> "Trap Selected!"
                     GamePhase.HandoffA -> "Pass to Player B"
                     GamePhase.HandoffB -> "Pass to Player A"
                     else -> ""
@@ -123,7 +125,7 @@ fun TrapGamePlayScreen(viewModel: TrapGridViewModel, state: GameState) {
                 modifier = Modifier.size(boardSize)
             ) {
                 when (state.phase) {
-                    GamePhase.SecretA, GamePhase.SecretB, GamePhase.Playing, GamePhase.GameOver -> {
+                    GamePhase.SecretA, GamePhase.RevealingA, GamePhase.SecretB, GamePhase.RevealingB, GamePhase.Playing, GamePhase.GameOver -> {
                         BoardGrid(
                             state = state,
                             onCellClick = { index ->
@@ -199,7 +201,7 @@ fun BoardGrid(
     onCellClick: (Int) -> Unit
 ) {
     val isGameOver = state.phase == GamePhase.GameOver
-    val isSecretPicking = state.phase == GamePhase.SecretA || state.phase == GamePhase.SecretB
+    val isRevealing = state.phase == GamePhase.RevealingA || state.phase == GamePhase.RevealingB
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(state.gridSize.cols),
@@ -220,18 +222,21 @@ fun BoardGrid(
                 else -> null
             }
 
-            // In Trap Grid, face up means revealed
-            // Also show contents during secret picking so player knows what they are choosing (optional, but current logic shows it if revealed)
-            // Actually, in SecretPickScreen it was showContents = false.
-            // Let's stick to: show contents only if revealed or isGameOver.
+            val isFaceUp = when {
+                cell.revealed -> true
+                isGameOver -> true
+                state.phase == GamePhase.RevealingA && isTrapA -> true
+                state.phase == GamePhase.RevealingB && isTrapB -> true
+                else -> false
+            }
             
             GameCard(
                 content = cell.content,
-                isFaceUp = cell.revealed || isGameOver || (isSecretPicking && (isTrapA || isTrapB)),
+                isFaceUp = isFaceUp,
                 onClick = { onCellClick(index) },
                 modifier = Modifier.aspectRatio(1f),
                 highlightColor = highlightColor,
-                enabled = !cell.revealed && !isGameOver
+                enabled = !cell.revealed && !isGameOver && !isRevealing
             )
         }
     }
